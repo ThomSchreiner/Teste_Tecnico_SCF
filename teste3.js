@@ -1,15 +1,20 @@
-var data =  require("./fakeData");
+import { fakeData as data } from "./fakeData";
+import { AppError } from "./src/errors";
 
-module.exports = function(req, res) {
-  
-    var name =  req.query.name;
+const deleteUsers = (req, res) => {
+  const name = req.query.name;
 
-    for(let i = 0; i < data.length;  i++) {
-        if(i.name == name) {
-            data[i] = null;
-        }
-    }
+  const userIndex = data.findIndex((user) => user.name.includes(name));
+  if (userIndex == -1) {
+    throw new AppError("User not found!", 404);
+  }
 
-    res.send("success");
+  if (data[userIndex].id !== req.user.id) {
+    throw new AppError("Unauthorized!", 401);
+  }
 
+  data.splice(userIndex, 1);
+  return res.status(204).json({});
 };
+
+export default deleteUsers;

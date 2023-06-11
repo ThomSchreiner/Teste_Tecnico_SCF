@@ -1,17 +1,20 @@
-var data =  require("./fakeData");
+import { hashSync } from "bcryptjs";
+import { fakeData as data } from "./fakeData";
+import { v4 as uuid } from "uuid";
+import { userSchema } from "./src/schemas/user.schemas";
 
-module.exports = function(req, res){
-  
-    var name =  req.body.name;
-    var jov =  req.body.job;
-    
-    var newUser = {
-        name: name,
-        job: job,
-    }
+const postUsers = (req, res) => {
+  const newUser = {
+    id: uuid(),
+    ...req.body,
+    password: hashSync(req.body.password, 10),
+    readed: 0,
+  };
 
-    data.push(newUser)
-    
-    res.send(newUser);
+  data.push(newUser);
 
+  const formatedUser = userSchema.parse(newUser);
+  return res.status(201).json(formatedUser);
 };
+
+export default postUsers;

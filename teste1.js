@@ -1,24 +1,29 @@
-var data =  require("./fakeData");
+import { fakeData as data } from "./fakeData";
+import { AppError } from "./src/errors";
+import { userListSchema, userSchema } from "./src/schemas/user.schemas";
 
-const getUser = ( req, res, next ) => {
-    
-    var name =  req.query.name;
+const getUser = (req, res) => {
+  const name = req.query.name;
 
-    for(let i = 0; i < data.length;  i++) {
-        if(i.name == name) {
-            res.send(data[i]);
-        }
-    }
+  const userIndex = data.findIndex((user) => user.name.includes(name));
+  if (userIndex == -1) {
+    throw new AppError("User not found!", 404);
+  }
 
+  data[userIndex].readed += 1;
+
+  const formatedUser = userSchema.parse(data[userIndex]);
+  return res.json(formatedUser);
 };
 
-const getUsers = ( req, res, next ) => {
-    
-    res.send(data);
-    
+const getUsers = (req, res) => {
+  data.forEach((user, i) => (data[i].readed += 1));
+
+  const formatedUsers = userListSchema.parse(data);
+  return res.json(formatedUsers);
 };
 
-module.exports = {
-    getUser,
-    getUsers
+export default {
+  getUser,
+  getUsers,
 };
